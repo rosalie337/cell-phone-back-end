@@ -7,8 +7,7 @@ async function run() {
     try {
         await client.connect();
         await client.query(`
-            DROP TABLE IF EXISTS cellphones;
-            DROP TABLE IF EXISTS types;
+            DROP TABLE IF EXISTS cell_phones;
         `);
         console.log('drop tables complete');
     }

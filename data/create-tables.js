@@ -15,15 +15,10 @@ async function run() {
         await client.connect();
         // run a query to create tables
         await client.query(`
-            CREATE TABLE types (
-                id SERIAL PRIMARY KEY NOT NULL,
-                name VARCHAR(256) NOT NULL
-            );
-            CREATE TABLE cell-phones (
-                id SERIAL PRIMARY KEY NOT NULL,
+            CREATE TABLE cell_phones (
                 name VARCHAR(256) PRIMARY KEY NOT NULL,
                 type VARCHAR(256) NOT NULL,
-                image VARCHAR(256) NOT NULL REFERENCES types(id),
+                image_url VARCHAR(256) NOT NULL,
                 brand VARCHAR(256) NOT NULL,
                 year INTEGER NOT NULL,
                 color VARCHAR(256) NOT NULL,

@@ -1,64 +1,35 @@
 require('dotenv').config();
 const pg = require('pg');
 const Client = pg.Client;
-// import our seed data:
-const types = require('./types');
-const cell = require('./cell');
+// import seed data:
+const data = require('./cell_phone.js');
+
 run();
+
 async function run() {
     const client = new Client(process.env.DATABASE_URL);
+
     try {
         await client.connect();
-        // First save types and get each returned row which has
-        // the id of the type. Notice use of RETURNING:
-        const savedTypes = await Promise.all(
-            types.map(async type => {
-                const result = await client.query(`
-                    INSERT INTO types (name)
-                    VALUES ($1)
-                    RETURNING *;
-                `,
-                    [type]);
-                return result.rows[0];
-            })
-        );
-        [
-            { name: 'orange tabby', id: 1 },
-            { name: 'tuxedo', id: 2 },
-            { name: 'angora', id: 3 },
-        ];
-        [
-            {
-                name:'iphone',
-                type:'smartphone',
-                image:'',
-                year:2007,
-                brand:'Apple',
-                color:'Gold',
-            },
-            {
-                name: 'Garfield',
-                type: 'Orange Tabby',
-                url: 'assets/cell-phones/garfield.jpeg',
-                year: 1978,
-                lives: 7,
-                isSidekick: false
-            },
-        ]
+
+        // "Promise all" does a parallel execution of async tasks
         await Promise.all(
-            cell.map(cat => {
-                // Find the corresponding type id
-                // find the id of the matching cat type!
-                const type = savedTypes.find(type => {
-                    return type.name === cat.type;
-                });
+            // for every cat data, we want a promise to insert into the db
+            data.map(cell_phone => {
+
+                // This is the query to insert a cat into the db.
+                // First argument is the function is the "parameterized query"
                 return client.query(`
-                    INSERT INTO cell (name, type_id, url, year, lives, is_sidekick)
-                    VALUES ($1, $2, $3, $4, $5, $6);
+                    INSERT INTO cell_phones (name, type, image_url, brand, year, color, is_touchscreen)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7);
                 `,
-                [cell.name, type.id, cell.url, cat.year, cat.lives, cat.isSidekick]);
+                    // Second argument is an array of values for each parameter in the query:
+                [cell_phone.name, cell_phone.type, cell_phone.image_url, cell_phone.brand, cell_phone.year, cell_phone.color, cell_phone.is_touchscreen]);
+
             })
         );
+
+
         console.log('seed data load complete');
     }
     catch (err) {
@@ -67,4 +38,5 @@ async function run() {
     finally {
         client.end();
     }
+
 }
