@@ -2,7 +2,8 @@ require('dotenv').config();
 const pg = require('pg');
 const Client = pg.Client;
 // import seed data:
-const data = require('./cell_phone.js');
+const types = require('./types.js');
+const cell_phone = require('./cell_phone.js');
 
 run();
 
@@ -11,26 +12,35 @@ async function run() {
 
     try {
         await client.connect();
-
-        // "Promise all" does a parallel execution of async tasks
-        await Promise.all(
-            // for every cat data, we want a promise to insert into the db
-            data.map(cell_phone => {
-
-                // This is the query to insert a cat into the db.
-                // First argument is the function is the "parameterized query"
-                return client.query(`
-                    INSERT INTO cell_phones (name, type, image_url, brand, year, color, is_touchscreen)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7);
-                `,
-                    // Second argument is an array of values for each parameter in the query:
-                [cell_phone.name, cell_phone.type, cell_phone.image_url, cell_phone.brand, cell_phone.year, cell_phone.color, cell_phone.is_touchscreen]);
-
+        
+        const savedTypes = await Promise.all(
+            types.map(async type => {
+                const result = await client.query(`
+                data.map(cell_phone => {
+                INSERT INTO types (type)
+                VALUE ($1)
+                RETURNING *;
+            `,
+                [type]);
+                
+                return result.rows[0];
+            
             })
         );
+        await Promise.all(
+            cell_phone.map(phone => {
 
-
-        console.log('seed data load complete');
+                const type = savedTypes.find(type => {
+                    return type.name === phone.type;
+                });
+                
+                return client.query(`
+                INSERT INTO cell_phones (name, type_id, image_url, brand, year, color, is_touchscreen)
+                VALUES ($1, $2, $3, $4, $5, $6, $7);
+            `,
+                [cell_phone.name, type.id, cell_phone.image_url, cell_phone.brand, cell_phone.year, cell_phone.color, cell_phone.is_touchscreen]);
+            })
+        );
     }
     catch (err) {
         console.log(err);
