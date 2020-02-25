@@ -55,7 +55,7 @@ app.get('/api/cell_phones/:phoneId', async(req, res) => {
 });
 // using .post instead of get
 app.post('/api/cell_phones', async(req, res) => {
-    // using req.body instead of req.params or req.query (which belong to /GET requests)
+    // using req.body instead of req.params or req.query (which belong to /GET requests)__
     try {
         console.log(req.body);
         // make a new cat out of the cat that comes in req.body;
@@ -66,6 +66,64 @@ app.post('/api/cell_phones', async(req, res) => {
         [req.body.name, req.body.type_id, req.body.image_url, req.body.brand, req.body.year, req.body.color, req.body.is_touchscreen]
         );
         res.json(result.rows[0]); // return just the first result of our query
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error: err.message || err
+        });
+    }
+});
+
+app.put('/api/cell_phones', async(req, res) => {
+    // using req.body instead of req.params or req.query (which belong to /GET requests)
+    try {
+        console.log(req.body);
+        // make a new cat out of the cat that comes in req.body;
+        const result = await client.query(`
+            UPDATE cell_phones
+            SET name = '${req.body.name}', 
+                is_touchscreen = '${req.body.is_touchscreen}', 
+                image_url = '${req.body.image_url}', 
+                year = '${req.body.year}', 
+                brand = '${req.body.brand}',
+                type_id = '${req.body.type_id}'
+                color = '${req.body.color}'
+            WHERE id = ${req.body.id};
+        `,
+        );
+        res.json(result.rows[0]); // return just the first result of our query
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error: err.message || err
+        });
+    }
+});
+app.delete('/api/cell_phones/:phoneId', async(req, res) => {
+    try {
+        const result = await client.query(`
+        DELETE FROM cell_phones where id = ${req.params.phoneId} 
+        `);
+        res.json(result.rows);
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error: err.message || err
+        });
+    }
+});
+
+app.get('/api/types', async(req, res) => {
+    try {
+        const result = await client.query(`
+            SELECT *
+            FROM types
+            ORDER BY name;
+        `);
+        res.json(result.rows);
     }
     catch (err) {
         console.log(err);

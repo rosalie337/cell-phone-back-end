@@ -22,7 +22,8 @@ async function run() {
             );
 
             CREATE TABLE cell_phones (
-                name VARCHAR(256) PRIMARY KEY NOT NULL,
+                id SERIAL PRIMARY KEY NOT NULL,
+                name VARCHAR(256) NOT NULL,
                 type_id INTEGER NOT NULL REFERENCES types(id),
                 image_url VARCHAR(256) NOT NULL,
                 brand VARCHAR(256) NOT NULL,
