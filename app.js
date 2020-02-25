@@ -134,6 +134,3 @@ app.get('/api/types', async(req, res) => {
 });
 
 module.exports = { app, };
-app.listen(PORT, () => {
-    console.log('hello moto again', PORT);
-});
