@@ -19,7 +19,7 @@ app.get('/cell_phones', async(req, res) => {
     try {
         const result = await client.query(`
         SELECT 
-        c.* 
+        c.*,
         t.name as type
         FROM cell_phones c
         JOIN types t
