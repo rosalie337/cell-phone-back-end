@@ -16,9 +16,8 @@ async function run() {
         const savedTypes = await Promise.all(
             types.map(async type => {
                 const result = await client.query(`
-                data.map(cell_phone => {
-                INSERT INTO types (type)
-                VALUE ($1)
+                INSERT INTO types (name)
+                VALUES ($1)
                 RETURNING *;
             `,
                 [type]);
@@ -33,12 +32,15 @@ async function run() {
                 const type = savedTypes.find(type => {
                     return type.name === phone.type;
                 });
+                if (!cell_phone.name){
+                    console.log(cell_phone, type);
+                }
                 
                 return client.query(`
                 INSERT INTO cell_phones (name, type_id, image_url, brand, year, color, is_touchscreen)
                 VALUES ($1, $2, $3, $4, $5, $6, $7);
             `,
-                [cell_phone.name, type.id, cell_phone.image_url, cell_phone.brand, cell_phone.year, cell_phone.color, cell_phone.is_touchscreen]);
+                [phone.name, type.id, phone.image_url, phone.brand, phone.year, phone.color, phone.is_touchscreen]);
             })
         );
     }
